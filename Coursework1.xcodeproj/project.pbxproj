@@ -7,10 +7,20 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E55EED3A1DB8D29300740B47 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E55EED391DB8D29300740B47 /* main.cpp */; };
 		E5CC7A551DAF7D54005249C7 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5CC7A541DAF7D54005249C7 /* main.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		E55EED351DB8D29300740B47 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
 		E5CC7A4F1DAF7D54005249C7 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -23,11 +33,20 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		E55EED371DB8D29300740B47 /* Coursework1Release */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Coursework1Release; sourceTree = BUILT_PRODUCTS_DIR; };
+		E55EED391DB8D29300740B47 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		E5CC7A511DAF7D54005249C7 /* Coursework1 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Coursework1; sourceTree = BUILT_PRODUCTS_DIR; };
 		E5CC7A541DAF7D54005249C7 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		E55EED341DB8D29300740B47 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E5CC7A4E1DAF7D54005249C7 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -38,10 +57,19 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		E55EED381DB8D29300740B47 /* Coursework1Release */ = {
+			isa = PBXGroup;
+			children = (
+				E55EED391DB8D29300740B47 /* main.cpp */,
+			);
+			path = Coursework1Release;
+			sourceTree = "<group>";
+		};
 		E5CC7A481DAF7D54005249C7 = {
 			isa = PBXGroup;
 			children = (
 				E5CC7A531DAF7D54005249C7 /* Coursework1 */,
+				E55EED381DB8D29300740B47 /* Coursework1Release */,
 				E5CC7A521DAF7D54005249C7 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -50,6 +78,7 @@
 			isa = PBXGroup;
 			children = (
 				E5CC7A511DAF7D54005249C7 /* Coursework1 */,
+				E55EED371DB8D29300740B47 /* Coursework1Release */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -65,6 +94,23 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		E55EED361DB8D29300740B47 /* Coursework1Release */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E55EED3B1DB8D29300740B47 /* Build configuration list for PBXNativeTarget "Coursework1Release" */;
+			buildPhases = (
+				E55EED331DB8D29300740B47 /* Sources */,
+				E55EED341DB8D29300740B47 /* Frameworks */,
+				E55EED351DB8D29300740B47 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Coursework1Release;
+			productName = Coursework1Release;
+			productReference = E55EED371DB8D29300740B47 /* Coursework1Release */;
+			productType = "com.apple.product-type.tool";
+		};
 		E5CC7A501DAF7D54005249C7 /* Coursework1 */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = E5CC7A581DAF7D54005249C7 /* Build configuration list for PBXNativeTarget "Coursework1" */;
@@ -91,6 +137,9 @@
 				LastUpgradeCheck = 0730;
 				ORGANIZATIONNAME = "Razvan Ilin";
 				TargetAttributes = {
+					E55EED361DB8D29300740B47 = {
+						CreatedOnToolsVersion = 7.3;
+					};
 					E5CC7A501DAF7D54005249C7 = {
 						CreatedOnToolsVersion = 7.3;
 					};
@@ -109,11 +158,20 @@
 			projectRoot = "";
 			targets = (
 				E5CC7A501DAF7D54005249C7 /* Coursework1 */,
+				E55EED361DB8D29300740B47 /* Coursework1Release */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
+		E55EED331DB8D29300740B47 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E55EED3A1DB8D29300740B47 /* main.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E5CC7A4D1DAF7D54005249C7 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -125,6 +183,20 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		E55EED3C1DB8D29300740B47 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		E55EED3D1DB8D29300740B47 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 		E5CC7A561DAF7D54005249C7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -209,6 +281,7 @@
 		E5CC7A591DAF7D54005249C7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -216,6 +289,7 @@
 		E5CC7A5A1DAF7D54005249C7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -223,6 +297,14 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		E55EED3B1DB8D29300740B47 /* Build configuration list for PBXNativeTarget "Coursework1Release" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E55EED3C1DB8D29300740B47 /* Debug */,
+				E55EED3D1DB8D29300740B47 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
 		E5CC7A4C1DAF7D54005249C7 /* Build configuration list for PBXProject "Coursework1" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -239,6 +321,7 @@
 				E5CC7A5A1DAF7D54005249C7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

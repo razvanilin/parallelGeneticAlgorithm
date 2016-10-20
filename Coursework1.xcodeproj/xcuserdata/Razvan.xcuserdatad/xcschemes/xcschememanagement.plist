@@ -9,9 +9,24 @@
 			<key>orderHint</key>
 			<integer>0</integer>
 		</dict>
+		<key>Coursework1Release.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>1</integer>
+		</dict>
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
+		<key>E55EED2B1DB8CB8200740B47</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>E55EED361DB8D29300740B47</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
 		<key>E5CC7A501DAF7D54005249C7</key>
 		<dict>
 			<key>primary</key>
