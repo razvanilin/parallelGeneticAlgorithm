@@ -123,7 +123,7 @@ vector<genome> epoch(unsigned int pop_size, vector<genome> &genomes)
 	if (((NUM_COPIES_ELITE * NUM_ELITE) % 2) == 0)
 		grab_N_best(NUM_ELITE, NUM_COPIES_ELITE, genomes, babies);
 
-//#pragma omp parallel for num_threads(thread_count)
+#pragma omp parallel for num_threads(thread_count)
 	for (signed int i = NUM_ELITE * NUM_COPIES_ELITE; i < pop_size; i += 2)
 	{
 		auto mum = roulette_wheel_selection(pop_size, fitness, genomes);
