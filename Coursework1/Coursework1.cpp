@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <vector>
 #include <memory>
@@ -9,6 +10,8 @@
 #include <cstring>
 #include <omp.h>
 #include <thread>
+#include <ctime>
+
 
 using namespace std;
 using namespace std::chrono;
@@ -102,7 +105,6 @@ void mutate(double mutation_rate, genome &gen)
 
 	int thread_count = thread::hardware_concurrency();
 
-//#pragma omp parallel for num_threads(thread_count) schedule(static, 1)
 	for (auto &bit : gen.bits)
 	{
 		rnd = dist(e);
@@ -121,28 +123,11 @@ vector<genome> epoch(unsigned int pop_size, vector<genome> &genomes)
 	if (((NUM_COPIES_ELITE * NUM_ELITE) % 2) == 0)
 		grab_N_best(NUM_ELITE, NUM_COPIES_ELITE, genomes, babies);
 
-#pragma omp parallel for num_threads(thread_count)
+//#pragma omp parallel for num_threads(thread_count)
 	for (signed int i = NUM_ELITE * NUM_COPIES_ELITE; i < pop_size; i += 2)
 	{
 		auto mum = roulette_wheel_selection(pop_size, fitness, genomes);
 		auto dad = roulette_wheel_selection(pop_size, fitness, genomes);
-		/*genome mum;
-		genome dad;
-
-		bool isMomGenerated = false;
-		bool isDadGenerated = false;
-
-#pragma omp parallel for num_threads(thread_count)
-		for (int i = 0; i < 2; ++i) {
-			if (isMomGenerated) {
-				dad = roulette_wheel_selection(pop_size, fitness, genomes);
-				isDadGenerated = true;
-			}
-			else {
-				mum = roulette_wheel_selection(pop_size, fitness, genomes);
-				isMomGenerated = true;
-			}
-		}*/
 
 		genome baby1;
 		genome baby2;
@@ -152,21 +137,6 @@ vector<genome> epoch(unsigned int pop_size, vector<genome> &genomes)
 		mutate(MUTATION_RATE, baby1);
 		mutate(MUTATION_RATE, baby2);
 
-		/*bool isBaby1Generated = false;
-		bool isBaby2Generated = false;
-
-#pragma omp parallel for num_threads(thread_count)
-		for (int i = 0; i < 2; ++i) {
-			if (isBaby1Generated) {
-				mutate(MUTATION_RATE, baby2);
-				isBaby2Generated = true;
-			}
-			else {
-				mutate(MUTATION_RATE, baby1);
-				isBaby1Generated = true;
-			}
-		}*/
-
 		babies[i] = baby1;
 		babies[i + 1] = baby2;
 	}
@@ -175,12 +145,9 @@ vector<genome> epoch(unsigned int pop_size, vector<genome> &genomes)
 
 vector<unsigned int> decode(genome &gen)
 {
-	int thread_count = thread::hardware_concurrency();
-
 	static vector<unsigned int> this_gene(gen.gene_length);
 	vector<unsigned int> decoded(NUM_CHARS);
 
-//#pragma omp parallel for num_threads(thread_count)
 	for (unsigned int gene = 0, count = 0; gene < gen.bits.size(); gene += gen.gene_length, ++count)
 	{
 		for (unsigned int bit = 0; bit < gen.gene_length; ++bit)
@@ -200,13 +167,40 @@ vector<unsigned int> decode(genome &gen)
 
 vector<vector<unsigned int>> update_epoch(unsigned int pop_size, vector<genome> &genomes)
 {
-	vector<vector<unsigned int>> guesses;
 	int thread_count = thread::hardware_concurrency();
+	vector<vector<unsigned int>> guesses;
 
 	genomes = epoch(pop_size, genomes);
 
-	for (unsigned int i = 0; i < genomes.size(); ++i)
-		guesses.push_back(decode(genomes[i]));
+	// reserve memory for the guesses vector to be able to populate it inside the parallel for loop
+	guesses.reserve(genomes.size());
+	for (int i = 0; i < genomes.size(); ++i)
+	{
+		guesses.push_back(vector<unsigned int>(NUM_CHARS));
+		guesses[i].reserve(NUM_CHARS);
+	}
+
+#pragma omp parallel for num_threads(thread_count)
+	for (int i = 0; i < genomes.size(); ++i)
+	{
+		for (unsigned int gene = 0, count = 0; gene < genomes[i].bits.size(); gene += genomes[i].gene_length, ++count)
+		{
+			unsigned int val = 0;
+			unsigned int multiplier = 1;
+
+			guesses[i][count] = 0;
+			
+			for (unsigned int c_bit = GENE_LENGTH; c_bit > 0; --c_bit)
+			{
+				val += genomes[i].bits[gene + c_bit - 1] * multiplier;
+				multiplier *= 2;
+			}
+
+			guesses[i][count] = val;
+
+		}
+	}
+
 	return guesses;
 }
 
@@ -234,30 +228,43 @@ string get_guess(const vector<unsigned int> &guess)
 
 int main()
 {
-	default_random_engine e(duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count());
-	uniform_int_distribution<unsigned int> int_dist(0, 1);
-	vector<genome> genomes(POP_SIZE);
+	ofstream data("epoch_omp_parallel_for_2x_static.csv", ofstream::out);
 
-	int thread_count = thread::hardware_concurrency();
+	for (int k = 0; k < 100; ++k) {
+		auto start = system_clock::now();
+		default_random_engine e(duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count());
+		uniform_int_distribution<unsigned int> int_dist(0, 1);
+		vector<genome> genomes(POP_SIZE);
 
-	cout << "Threads: " << thread_count << endl;
+		int thread_count = thread::hardware_concurrency();
 
-	for (unsigned int i = 0; i < POP_SIZE; ++i)
-	{
-		for (unsigned int j = 0; j < CHROMO_LENGTH; ++j)
-			genomes[i].bits.push_back(int_dist(e));
-	}
-	auto population = update_epoch(POP_SIZE, genomes);
-	for (unsigned int generation = 0; generation < 2048; ++generation)
-	{
+		cout << "Threads: " << thread_count << endl;
+
 		for (unsigned int i = 0; i < POP_SIZE; ++i)
-			genomes[i].fitness = check_guess(population[i]);
-		population = update_epoch(POP_SIZE, genomes);
-		if (generation % 10 == 0)
 		{
-			cout << "Generation " << generation << ": " << get_guess(decode(best)) << endl;
-			cout << "Diff: " << check_guess(decode(best)) << endl;
+			for (unsigned int j = 0; j < CHROMO_LENGTH; ++j)
+				genomes[i].bits.push_back(int_dist(e));
 		}
+		auto population = update_epoch(POP_SIZE, genomes);
+		for (unsigned int generation = 0; generation < 2048; ++generation)
+		{
+			for (unsigned int i = 0; i < POP_SIZE; ++i)
+				genomes[i].fitness = check_guess(population[i]);
+			population = update_epoch(POP_SIZE, genomes);
+			if (generation % 10 == 0)
+			{
+				cout << "Iteration: " << k << endl;
+				cout << "Generation " << generation << ": " << get_guess(decode(best)) << endl;
+				cout << "Diff: " << check_guess(decode(best)) << endl;
+			}
+		}
+
+		auto end = system_clock::now();
+		auto total = end - start;
+		data << duration_cast<milliseconds>(total).count() << endl;
 	}
+
+	data.close();
+
 	return 0;
 }
