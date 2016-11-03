@@ -59,7 +59,7 @@ void grab_N_best(const unsigned int N, const unsigned int copies, vector<genome>
 			new_pop[n * copies + i] = old_pop[n];
 }
 
-const genome& roulette_wheel_selection(unsigned int pop_size, const unsigned int fitness, const vector<genome> &genomes)
+const genome& roulette_wheel_selection(unsigned int pop_size, const unsigned int fitness, const genome* genomes)
 {
 	static default_random_engine e(duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count());
 	static uniform_real_distribution<double> dist;
@@ -75,7 +75,7 @@ const genome& roulette_wheel_selection(unsigned int pop_size, const unsigned int
 	return genomes[0];
 }
 
-void cross_over(double crossover_rate, unsigned int chromo_length, const genome &mum, const genome &dad, genome &baby1, genome &baby2)
+void cross_over(double crossover_rate, unsigned int chromo_length, const genome &mum, const genome &dad, genome *baby1, genome *baby2)
 {
 	static default_random_engine e(duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count());
 	static uniform_real_distribution<double> float_dist;
@@ -83,21 +83,21 @@ void cross_over(double crossover_rate, unsigned int chromo_length, const genome 
 
 	if (float_dist(e) > crossover_rate || mum.bits == dad.bits)
 	{
-		baby1.bits = mum.bits;
-		baby2.bits = mum.bits;
+		baby1->bits = mum.bits;
+		baby2->bits = mum.bits;
 	}
 	else
 	{
 		const unsigned int cp = int_dist(e);
 
-		baby1.bits.insert(baby1.bits.end(), mum.bits.begin(), mum.bits.begin() + cp);
-		baby1.bits.insert(baby1.bits.end(), dad.bits.begin() + cp, dad.bits.end());
-		baby2.bits.insert(baby2.bits.end(), dad.bits.begin(), dad.bits.begin() + cp);
-		baby2.bits.insert(baby2.bits.end(), mum.bits.begin() + cp, mum.bits.end());
+		baby1->bits.insert(baby1->bits.end(), mum.bits.begin(), mum.bits.begin() + cp);
+		baby1->bits.insert(baby1->bits.end(), dad.bits.begin() + cp, dad.bits.end());
+		baby2->bits.insert(baby2->bits.end(), dad.bits.begin(), dad.bits.begin() + cp);
+		baby2->bits.insert(baby2->bits.end(), mum.bits.begin() + cp, mum.bits.end());
 	}
 }
 
-void mutate(double mutation_rate, genome &gen)
+void mutate(double mutation_rate, genome *gen)
 {
 	static default_random_engine e(duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count());
 	static uniform_real_distribution<double> dist;
@@ -105,11 +105,31 @@ void mutate(double mutation_rate, genome &gen)
 
 	int thread_count = thread::hardware_concurrency();
 
-	for (auto &bit : gen.bits)
+	for (auto &bit : gen->bits)
 	{
 		rnd = dist(e);
 		if (rnd < mutation_rate)
 			bit = !bit;
+	}
+}
+
+void epoch_threaded(int chunk, unsigned int pop_size, int fitness, genome *genomes, genome *babies)
+{
+	for (unsigned int i = 0; i < chunk; i += 2)
+	{
+		auto mum = roulette_wheel_selection(pop_size, fitness, genomes);
+		auto dad = roulette_wheel_selection(pop_size, fitness, genomes);
+
+		genome baby1;
+		genome baby2;
+
+		cross_over(CROSSOVER_RATE, CHROMO_LENGTH, mum, dad, &babies[i], &babies[i + 1]);
+
+		mutate(MUTATION_RATE, &babies[i]);
+		mutate(MUTATION_RATE, &babies[i + 1]);
+
+		babies[i] = baby1;
+		babies[i + 1] = baby2;
 	}
 }
 
@@ -119,27 +139,27 @@ vector<genome> epoch(unsigned int pop_size, vector<genome> &genomes)
 
 	auto fitness = calculate_total_fitness(genomes);
 	vector<genome> babies(pop_size);
+	babies.reserve(pop_size);
+	vector<thread> threads(thread_count);
 
 	if (((NUM_COPIES_ELITE * NUM_ELITE) % 2) == 0)
 		grab_N_best(NUM_ELITE, NUM_COPIES_ELITE, genomes, babies);
 
-//#pragma omp parallel for num_threads(thread_count)
-	for (signed int i = NUM_ELITE * NUM_COPIES_ELITE; i < pop_size; i += 2)
-	{
-		auto mum = roulette_wheel_selection(pop_size, fitness, genomes);
-		auto dad = roulette_wheel_selection(pop_size, fitness, genomes);
+	// determine the chunk of work that needs to be done by each thread
+	int chunk = (pop_size - (NUM_ELITE * NUM_COPIES_ELITE)) / thread_count;
 
-		genome baby1;
-		genome baby2;
-
-		cross_over(CROSSOVER_RATE, CHROMO_LENGTH, mum, dad, baby1, baby2);
-
-		mutate(MUTATION_RATE, baby1);
-		mutate(MUTATION_RATE, baby2);
-
-		babies[i] = baby1;
-		babies[i + 1] = baby2;
+	// loop through the threads and call the newly formed function
+	for (int i = 0; i < thread_count; ++i) {
+		// call the helper function that contains the epoch logic
+		threads[i] = thread(epoch_threaded, chunk, pop_size, fitness, &genomes[0], &babies[NUM_COPIES_ELITE * NUM_ELITE + (i*chunk)]);
 	}
+
+	// join the threads
+	for (auto &t : threads)
+	{
+		t.join();
+	}
+
 	return babies;
 }
 
